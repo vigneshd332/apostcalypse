@@ -20,5 +20,5 @@ ECHO Cleaning Up...
 del cmake_install.cmake
 del CMakeCache.txt
 del Makefile
-del CMakeFiles
+RD /S /Q CMakeFiles
 ECHO Done.
