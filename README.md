@@ -1,5 +1,5 @@
 # aPOSTcalypse
-A C++ program to send a chain of HTTP requests to a server(s).
+A tool to send a chain of HTTP requests to a server(s).
 
 ### Build
 <ul>
