@@ -27,22 +27,23 @@ void getReq(HTTPClientSession& s){
 void postReq(HTTPClientSession& s){
     HTTPRequest request(HTTPRequest::HTTP_POST, route, HTTPMessage::HTTP_1_1);
     cout<<"POST Request Prepared"<<endl;
-    string reqBody("username=user1@yourdomain.com&password=mypword");
+    HTMLForm form;
+    form.set("username", "hecker@heckerwerks.com");
+    form.set("password", "totallyasafepassword");
+    form.prepareSubmit(request);
+    form.write(s.sendRequest(request));
     cout<<"FORM Prepared"<<endl;
-    request.setContentLength( reqBody.length() );
-    ostream& myOStream = s.sendRequest(request);
-    myOStream << reqBody;
     request.write(cout);
     cout<<"Request Sent, awaiting Response..."<<endl;
     HTTPResponse res;
     istream& iStr = s.receiveResponse(res);
     cout<<"Response Received"<<endl;
     cout<<res.getStatus()<<endl;
-    //cerr << iStr.rdbuf();
+    cerr << iStr.rdbuf();
 }
 
 int main(){
-    HTTPClientSession s(url);
+    HTTPClientSession s("127.0.0.1",5000);
     s.getKeepAlive();
     cout<<"Connected"<<endl;
     //s.setProxy("localhost", srv.port());
