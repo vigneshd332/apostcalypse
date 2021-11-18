@@ -10,9 +10,10 @@
 using namespace std;
 using namespace Poco::Net;
 string url = "www.example.com";
+string route = "/";
 
 void getReq(HTTPClientSession& s){
-    HTTPRequest request(HTTPRequest::HTTP_GET, "/", HTTPMessage::HTTP_1_1);
+    HTTPRequest request(HTTPRequest::HTTP_GET, route, HTTPMessage::HTTP_1_1);
     cout<<"GET Request Prepared"<<endl;
     HTTPResponse response;
     s.sendRequest(request);
@@ -24,25 +25,28 @@ void getReq(HTTPClientSession& s){
 }
 
 void postReq(HTTPClientSession& s){
-    HTTPRequest request(HTTPRequest::HTTP_POST, "/", HTTPMessage::HTTP_1_1);
-    HTMLForm form;
-    form.set("name", "value");
-    form.set("name2", "value2");
-    form.prepareSubmit(request);
-    cout<<"Request Prepared"<<endl;
-    HTTPResponse response;
-    s.sendRequest(request);
+    HTTPRequest request(HTTPRequest::HTTP_POST, route, HTTPMessage::HTTP_1_1);
+    cout<<"POST Request Prepared"<<endl;
+    string reqBody("username=user1@yourdomain.com&password=mypword");
+    cout<<"FORM Prepared"<<endl;
+    request.setContentLength( reqBody.length() );
+    ostream& myOStream = s.sendRequest(request);
+    myOStream << reqBody;
+    request.write(cout);
     cout<<"Request Sent, awaiting Response..."<<endl;
-    istream& rs = s.receiveResponse(response);
+    HTTPResponse res;
+    istream& iStr = s.receiveResponse(res);
     cout<<"Response Received"<<endl;
-    cout << response.getStatus() << endl;
+    cout<<res.getStatus()<<endl;
+    //cerr << iStr.rdbuf();
 }
 
 int main(){
     HTTPClientSession s(url);
+    s.getKeepAlive();
     cout<<"Connected"<<endl;
     //s.setProxy("localhost", srv.port());
-    getReq(s);
+    //getReq(s);
     postReq(s);
     return 0;
 }
