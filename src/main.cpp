@@ -9,14 +9,19 @@
 
 using namespace std;
 using namespace Poco::Net;
-string url = "www.example.com";
+string url = "";
+string ip = "";
+int port = 0;
 string route = "/";
+string method = "POST";
+bool loop = false;
+bool response = true;
 
 void getReq(HTTPClientSession& s){
     HTTPRequest request(HTTPRequest::HTTP_GET, route, HTTPMessage::HTTP_1_1);
     cout<<"GET Request Prepared"<<endl;
-    HTTPResponse response;
     s.sendRequest(request);
+    HTTPResponse response;
     cout<<"Request Sent, awaiting Response..."<<endl;
     istream& rs = s.receiveResponse(response);
     cout<<"Response Received"<<endl;
@@ -24,30 +29,85 @@ void getReq(HTTPClientSession& s){
     //Poco::StreamCopier::copyStream(rs, cout);
 }
 
-void postReq(HTTPClientSession& s){
+void postReq(HTTPClientSession& s, bool loop){
     HTTPRequest request(HTTPRequest::HTTP_POST, route, HTTPMessage::HTTP_1_1);
     cout<<"POST Request Prepared"<<endl;
     HTMLForm form;
     form.set("username", "hecker@heckerwerks.com");
     form.set("password", "totallyasafepassword");
     form.prepareSubmit(request);
-    form.write(s.sendRequest(request));
-    cout<<"FORM Prepared"<<endl;
-    request.write(cout);
-    cout<<"Request Sent, awaiting Response..."<<endl;
-    HTTPResponse res;
-    istream& iStr = s.receiveResponse(res);
-    cout<<"Response Received"<<endl;
-    cout<<res.getStatus()<<endl;
-    cerr << iStr.rdbuf();
+    while(true){
+        form.write(s.sendRequest(request));
+        //cout<<"FORM Prepared"<<endl;
+        //request.write(cout);
+        //cout<<"Request Sent, awaiting Response... ";
+        if(response==true){
+            HTTPResponse res;
+            istream& iStr = s.receiveResponse(res);
+            //cout<<"Response Received"<<endl;
+            cout<<res.getStatus();
+            //cerr << iStr.rdbuf();
+        }
+        cout<<endl;
+        if(!loop) break;
+    }
 }
 
-int main(){
-    HTTPClientSession s("127.0.0.1",5000);
-    s.getKeepAlive();
-    cout<<"Connected"<<endl;
-    //s.setProxy("localhost", srv.port());
-    //getReq(s);
-    postReq(s);
+int main(int argc, char *argv[]){
+    for(int i=0;i<argc;i++){
+        if(strcmp(argv[i],"-u")==0){
+            url = argv[i+1];
+        }
+        if(strcmp(argv[i],"-i")==0){
+            ip = argv[i+1];
+        }
+        if(strcmp(argv[i],"-p")==0){
+            port = atoi(argv[i+1]);
+        }
+        if(strcmp(argv[i],"-r")==0){
+            route = argv[i+1];
+        }
+        if(strcmp(argv[i],"-m")==0){
+            method = argv[i+1];
+        }
+        if(strcmp(argv[i],"-l")==0){
+            loop = true;
+        }
+        if(strcmp(argv[i],"-nr")==0){
+            response = false;
+        }
+    }
+    if(url.length()==0 && ip.length()==0){
+        cout<<"No URL/IP Specified"<<endl;
+        return 0;
+    }
+    if(port==0 && ip.length()!=0){
+        cout<<"No Port Specified"<<endl;
+        return 0;
+    }
+    if(ip.length()!=0 && port!=0){
+        HTTPClientSession s(ip,port);
+        s.getKeepAlive();
+        cout<<"Connected"<<endl;
+        //s.setProxy("localhost", srv.port());
+        if(method=="GET"){
+            getReq(s);
+        }
+        if(method=="POST"){
+            postReq(s, loop);
+        }
+    }
+    else{
+        HTTPClientSession s(url);
+        s.getKeepAlive();
+        cout<<"Connected"<<endl;
+        //s.setProxy("localhost", srv.port());
+        if(method=="GET"){
+            getReq(s);
+        }
+        if(method=="POST"){
+            postReq(s, loop);
+        }
+    }
     return 0;
 }
