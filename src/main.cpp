@@ -30,6 +30,7 @@ void getReq(HTTPClientSession& s){
 }
 
 void postReq(HTTPClientSession& s, bool loop){
+    int count = 0;
     HTTPRequest request(HTTPRequest::HTTP_POST, route, HTTPMessage::HTTP_1_1);
     cout<<"POST Request Prepared"<<endl;
     HTMLForm form;
@@ -45,8 +46,10 @@ void postReq(HTTPClientSession& s, bool loop){
             HTTPResponse res;
             istream& iStr = s.receiveResponse(res);
             //cout<<"Response Received"<<endl;
-            cout<<res.getStatus();
+            cout<<"Status : "<<res.getStatus()<<" Count : "<<count++;
             //cerr << iStr.rdbuf();
+        }else{
+            cout<<count++;
         }
         cout<<endl;
         if(!loop) break;
