@@ -12,26 +12,36 @@ using namespace Poco::Net;
 string url = "";
 string ip = "";
 int port = 0;
-string route = "/";
+string route = "";
 string method = "POST";
 bool loop = false;
 bool response = true;
 
 void getReq(HTTPClientSession& s){
+    int count = 0;
     HTTPRequest request(HTTPRequest::HTTP_GET, route, HTTPMessage::HTTP_1_1);
     cout<<"GET Request Prepared"<<endl;
-    s.sendRequest(request);
-    HTTPResponse response;
-    cout<<"Request Sent, awaiting Response..."<<endl;
-    istream& rs = s.receiveResponse(response);
-    cout<<"Response Received"<<endl;
-    cout << response.getStatus() << endl;
-    //Poco::StreamCopier::copyStream(rs, cout);
+    while(true){
+        s.sendRequest(request);
+        if(response){
+            HTTPResponse response;
+            cout<<"Request Sent, awaiting Response..."<<endl;
+            istream& rs = s.receiveResponse(response);
+            cout<<"Response Received"<<endl;
+            cout<<"Status : "<<response.getStatus()<<" Count : "<<count++;
+        }
+        else{
+            cout<<"Count : "<<count++;
+        }
+        cout<<endl;
+        if(!loop) break;
+    }
+    // Poco::StreamCopier::copyStream(rs, cout);
 }
 
 void postReq(HTTPClientSession& s, bool loop){
     int count = 0;
-    HTTPRequest request(HTTPRequest::HTTP_POST, route, HTTPMessage::HTTP_1_1);
+    HTTPRequest request(HTTPRequest::HTTP_POST, "/"+route, HTTPMessage::HTTP_1_1);
     cout<<"POST Request Prepared"<<endl;
     HTMLForm form;
     form.set("username", "hecker@heckerwerks.com");
@@ -42,14 +52,14 @@ void postReq(HTTPClientSession& s, bool loop){
         //cout<<"FORM Prepared"<<endl;
         //request.write(cout);
         //cout<<"Request Sent, awaiting Response... ";
-        if(response==true){
-            HTTPResponse res;
-            istream& iStr = s.receiveResponse(res);
+        if(response){
+            HTTPResponse response;
+            istream& iStr = s.receiveResponse(response);
             //cout<<"Response Received"<<endl;
-            cout<<"Status : "<<res.getStatus()<<" Count : "<<count++;
+            cout<<"Status : "<<response.getStatus()<<" Count : "<<count++;
             //cerr << iStr.rdbuf();
         }else{
-            cout<<count++;
+            cout<<"Count : "<<count++;
         }
         cout<<endl;
         if(!loop) break;
@@ -102,6 +112,7 @@ int main(int argc, char *argv[]){
     }
     else{
         HTTPClientSession s(url);
+        cout<<"URL : "<<url+"/"+route<<endl;
         s.getKeepAlive();
         cout<<"Connected"<<endl;
         //s.setProxy("localhost", srv.port());
