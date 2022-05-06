@@ -3,6 +3,7 @@
 
 # Executable
 apost.exe
+apost
 
 # Build Generated Files
 /CMakeFiles

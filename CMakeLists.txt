@@ -1,8 +1,13 @@
 cmake_minimum_required(VERSION 2.8.12)
 project(main.cpp)
-
-set(Poco_DIR "C:/msys32/mingw64/lib") 
-set(Poco_INCLUDE_DIRS "C:/msys32/mingw64/lib")
+ 
+if(UNIX)
+    set(Poco_DIR "/usr/lib") 
+    set(Poco_INCLUDE_DIRS "/usr/local/include/Poco")
+else()
+    set(Poco_DIR "C:/msys32/mingw64/lib") 
+    set(Poco_INCLUDE_DIRS "C:/msys32/mingw64/lib")  
+endif(UNIX)
 
 find_package(Poco REQUIRED COMPONENTS Foundation Net ) # add other components here
 
